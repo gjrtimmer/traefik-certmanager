@@ -8,4 +8,4 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN pip install kubernetes
 COPY main.py /
-CMD python /main.py
+CMD ["python", "/main.py"]
