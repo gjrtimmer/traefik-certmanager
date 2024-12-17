@@ -6,7 +6,6 @@ import signal
 import sys
 import threading
 
-from unicodedata import name
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
 
@@ -39,10 +38,10 @@ def create_certificate(crds, namespace, secretname, routes):
     Create a certificate request for certmanager based on the IngressRoute
     """
     try:
-        secret = crds.get_namespaced_custom_object(CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname)
+        # secret = crds.get_namespaced_custom_object(CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname)
         logging.info(f"{secretname} : certificate request already exists.")
         return
-    except ApiException as e:
+    except ApiException:
         pass
 
     for route in routes:
@@ -88,7 +87,7 @@ def watch_crd(group, version, plural):
     """
     Watch Traefik IngressRoute CRD and create/delete certificates based on them
     """
-    #config.load_kube_config()
+    # config.load_kube_config()
     config.load_incluster_config()
     crds = client.CustomObjectsApi()
     resource_version = ""
@@ -117,7 +116,7 @@ def watch_crd(group, version, plural):
                 # if no secretName is set, add one to the IngressRoute
                 if not secretname and PATCH_SECRETNAME:
                     logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, patch to add one")
-                    patch = { "spec": { "tls": { "secretName": name }}}
+                    patch = {"spec": {"tls": {"secretName": name}}}
                     crds.patch_namespaced_custom_object(group, version, namespace, plural, name, patch)
                     secretname = name
                 if secretname:
