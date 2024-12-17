@@ -19,6 +19,7 @@ CERT_ISSUER_NAME = os.getenv("ISSUER_NAME", "letsencrypt")
 CERT_ISSUER_KIND = os.getenv("ISSUER_KIND", "ClusterIssuer")
 CERT_CLEANUP = os.getenv("CERT_CLEANUP", "false").lower() in ("yes", "true", "t", "1")
 PATCH_SECRETNAME = os.getenv("PATCH_SECRETNAME", "false").lower() in ("yes", "true", "t", "1")
+SUPPORT_LEGACY_CRDS = os.getenv("SUPPORT_LEGACY_CRDS", "true").lower() in ("yes", "true", "t", "1")
 
 
 def safe_get(obj, keys, default=None):
@@ -147,19 +148,25 @@ def main():
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
 
-    # deprecated traefik CRD
-    th1 = threading.Thread(target=watch_crd, args=("traefik.containo.us", "v1alpha1", "ingressroutes"), daemon=True)
+    # new traefik CRD    
+    th1 = threading.Thread(target=watch_crd, args=("traefik.io", "v1alpha1", "ingressroutes"), daemon=True)
     th1.start()
 
-    # new traefik CRD    
-    th2 = threading.Thread(target=watch_crd, args=("traefik.io", "v1alpha1", "ingressroutes"), daemon=True)
-    th2.start()
+    if SUPPORT_LEGACY_CRDS:
+        # deprecated traefik CRD
+        th2 = threading.Thread(target=watch_crd, args=("traefik.containo.us", "v1alpha1", "ingressroutes"), daemon=True)
+        th2.start()
 
-    # wait for threads to finish
-    while th1.is_alive() and th2.is_alive():
-        th1.join(0.1)
-        th2.join(0.1)
-    logging.info(f"One of the threads exited {th1.is_alive()}, {th2.is_alive()}")
+        # wait for threads to finish
+        while th1.is_alive() and th2.is_alive():
+            th1.join(0.1)
+            th2.join(0.1)
+        logging.info(f"traefik.containo.us/v1alpha1/ingressroutes watcher exited {th2.is_alive()}")
+    else:
+        # wait for threads to finish
+        while th1.is_alive():
+            th1.join(0.1)
+    logging.info(f"traefik.io/v1alpha1/ingressroutes watcher exited {th1.is_alive()}")
 
 
 if __name__ == '__main__':
