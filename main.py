@@ -38,7 +38,7 @@ def create_certificate(crds, namespace, secretname, routes):
     Create a certificate request for certmanager based on the IngressRoute
     """
     try:
-        # secret = crds.get_namespaced_custom_object(CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname)
+        assert crds.get_namespaced_custom_object(CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname)
         logging.info(f"{secretname} : certificate request already exists.")
         return
     except ApiException:
