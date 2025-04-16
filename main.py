@@ -5,6 +5,7 @@ import re
 import signal
 import sys
 import threading
+import time
 
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
@@ -95,9 +96,16 @@ def watch_crd(group, version, plural):
     logging.info(f"Watching {group}/{version}/{plural}")
 
     while True:
-        stream = watch.Watch().stream(crds.list_cluster_custom_object,
-                                      group=group, version=version, plural=plural,
-                                      resource_version=resource_version)
+        try:
+            stream = watch.Watch().stream(
+                crds.list_cluster_custom_object,
+                group=group, version=version, plural=plural,
+                resource_version=resource_version
+            )
+        except Exception as e:
+            logging.warning(f"Stream failed: {e}")
+            time.sleep(1)
+            continue
         for event in stream:
             t = event["type"]
             obj = event["object"]
