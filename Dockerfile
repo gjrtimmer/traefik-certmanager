@@ -1,4 +1,4 @@
-FROM python:alpine
+FROM python:3.13-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     ISSUER_NAME=letsencrypt \
@@ -6,6 +6,9 @@ ENV PYTHONUNBUFFERED=1 \
     CERT_CLEANUP=false \
     PATCH_SECRETNAME=true
 
-RUN pip install kubernetes
-COPY main.py /
-CMD python /main.py
+RUN mkdir /app && \
+    pip install --no-cache-dir -r requirements.txt
+
+COPY main.py /app/main.py
+
+CMD ["python", "/main.py"]
