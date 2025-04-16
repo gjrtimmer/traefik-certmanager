@@ -102,48 +102,48 @@ def watch_crd(group, version, plural):
                 group=group, version=version, plural=plural,
                 resource_version=resource_version
             )
+            for event in stream:
+                t = event["type"]
+                obj = event["object"]
+
+                # Configure where to resume streaming.
+                resource_version = safe_get(obj, "metadata.resourceVersion", resource_version)
+
+                # get information about IngressRoute
+                namespace = safe_get(obj, "metadata.namespace")
+                name = safe_get(obj, "metadata.name")
+                secretname = safe_get(obj, "spec.tls.secretName")
+                routes = safe_get(obj, 'spec.routes')
+
+                # create or delete certificate based on event type
+                if t == 'ADDED':
+                    # if no secretName is set, add one to the IngressRoute
+                    if not secretname and PATCH_SECRETNAME:
+                        logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, patch to add one")
+                        patch = {"spec": {"tls": {"secretName": name}}}
+                        crds.patch_namespaced_custom_object(group, version, namespace, plural, name, patch)
+                        secretname = name
+                    if secretname:
+                        create_certificate(crds, namespace, secretname, routes)
+                    else:
+                        logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, skipping adding")
+                elif t == 'DELETED':
+                    if secretname:
+                        delete_certificate(crds, namespace, secretname)
+                    else:
+                        logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, skipping delete")
+                elif t == 'MODIFIED':
+                    if secretname:
+                        create_certificate(crds, namespace, secretname, routes)
+                    else:
+                        logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, skipping modify")
+                else:
+                    logging.info(f"{namespace}/{name} : unknown event type: {t}")
+                    logging.debug(json.dumps(obj, indent=2))
         except Exception as e:
             logging.warning(f"Stream failed: {e}")
             time.sleep(1)
             continue
-        for event in stream:
-            t = event["type"]
-            obj = event["object"]
-
-            # Configure where to resume streaming.
-            resource_version = safe_get(obj, "metadata.resourceVersion", resource_version)
-
-            # get information about IngressRoute
-            namespace = safe_get(obj, "metadata.namespace")
-            name = safe_get(obj, "metadata.name")
-            secretname = safe_get(obj, "spec.tls.secretName")
-            routes = safe_get(obj, 'spec.routes')
-
-            # create or delete certificate based on event type
-            if t == 'ADDED':
-                # if no secretName is set, add one to the IngressRoute
-                if not secretname and PATCH_SECRETNAME:
-                    logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, patch to add one")
-                    patch = {"spec": {"tls": {"secretName": name}}}
-                    crds.patch_namespaced_custom_object(group, version, namespace, plural, name, patch)
-                    secretname = name
-                if secretname:
-                    create_certificate(crds, namespace, secretname, routes)
-                else:
-                    logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, skipping adding")
-            elif t == 'DELETED':
-                if secretname:
-                    delete_certificate(crds, namespace, secretname)
-                else:
-                    logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, skipping delete")
-            elif t == 'MODIFIED':
-                if secretname:
-                    create_certificate(crds, namespace, secretname, routes)
-                else:
-                    logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, skipping modify")
-            else:
-                logging.info(f"{namespace}/{name} : unknown event type: {t}")
-                logging.debug(json.dumps(obj, indent=2))
 
 
 def exit_gracefully(signum, frame):
