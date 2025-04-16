@@ -158,13 +158,13 @@ def main():
 
         # wait for threads to finish
         while th1.is_alive() and th2.is_alive():
-            th1.join(0.1)
-            th2.join(0.1)
+            th1.join()
+            th2.join()
         logging.info(f"traefik.containo.us/v1alpha1/ingressroutes watcher exited {th2.is_alive()}")
     else:
         # wait for threads to finish
         while th1.is_alive():
-            th1.join(0.1)
+            th1.join()
     logging.info(f"traefik.io/v1alpha1/ingressroutes watcher exited {th1.is_alive()}")
 
 
