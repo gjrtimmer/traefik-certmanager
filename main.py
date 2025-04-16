@@ -147,7 +147,7 @@ def main():
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
 
-    # new traefik CRD    
+    # new traefik CRD
     th1 = threading.Thread(target=watch_crd, args=("traefik.io", "v1alpha1", "ingressroutes"), daemon=True)
     th1.start()
 
