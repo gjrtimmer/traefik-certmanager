@@ -1,4 +1,4 @@
-FROM python:alpine
+FROM python:3.11-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     ISSUER_NAME=letsencrypt \
@@ -8,4 +8,4 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN pip install kubernetes
 COPY main.py /
-CMD python /main.py
+CMD ["python", "/main.py"]
