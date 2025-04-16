@@ -1,3 +1,4 @@
+import argparse
 import json
 import logging
 import os
@@ -9,8 +10,12 @@ import time
 
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 
+# Load configuration
 CERT_GROUP = "cert-manager.io"
 CERT_VERSION = "v1"
 CERT_KIND = "Certificate"
@@ -84,12 +89,14 @@ def delete_certificate(crds, namespace, secretname):
             logging.exception("Exception when calling CustomObjectsApi->delete_namespaced_custom_object:", e)
 
 
-def watch_crd(group, version, plural):
+def watch_crd(group, version, plural, use_local_config=False):
     """
     Watch Traefik IngressRoute CRD and create/delete certificates based on them
     """
-    # config.load_kube_config()
-    config.load_incluster_config()
+    if use_local_config:
+        config.load_kube_config()
+    else:
+        config.load_incluster_config()
     crds = client.CustomObjectsApi()
     resource_version = ""
 
@@ -152,16 +159,28 @@ def exit_gracefully(signum, frame):
 
 
 def main():
+    # Check if the script is running in a Kubernetes cluster or locally
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--local", action="store_true")
+    args = parser.parse_args()
+
+    logging.info("Starting traefik-cert-manager")
+    logging.info(f"Using cert-manager {CERT_GROUP}/{CERT_VERSION}/{CERT_PLURAL}")
+    logging.info(f"Using cert-manager issuer={CERT_ISSUER_KIND}/{CERT_ISSUER_NAME}")
+    logging.info(f"Using cert-manager cleanup={CERT_CLEANUP}")
+    logging.info(f"Using cert-manager patch-secretName={PATCH_SECRETNAME}")
+    logging.info(f"Using cert-manager legacy-CRDs={SUPPORT_LEGACY_CRDS}")
+
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
 
     # new traefik CRD
-    th1 = threading.Thread(target=watch_crd, args=("traefik.io", "v1alpha1", "ingressroutes"), daemon=True)
+    th1 = threading.Thread(target=watch_crd, args=("traefik.io", "v1alpha1", "ingressroutes", args.local), daemon=True)
     th1.start()
 
     if SUPPORT_LEGACY_CRDS:
         # deprecated traefik CRD
-        th2 = threading.Thread(target=watch_crd, args=("traefik.containo.us", "v1alpha1", "ingressroutes"), daemon=True)
+        th2 = threading.Thread(target=watch_crd, args=("traefik.containo.us", "v1alpha1", "ingressroutes", args.local), daemon=True)
         th2.start()
 
         # wait for threads to finish
