@@ -286,7 +286,7 @@ def main():
 
     candidate_id = get_candidate_id()
     namespace = os.getenv("POD_NAMESPACE", "default")
-    lock = ConfigMapLock("cert-watcher-leader-lock", namespace, candidate_id)
+    lock = ConfigMapLock("traefik-cert-manager-leader-lock", namespace, candidate_id)
     onstart = partial(on_started_leading, candidate_id)
 
     le_cfg = electionconfig.Config(
