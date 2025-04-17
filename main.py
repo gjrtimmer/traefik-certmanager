@@ -46,6 +46,13 @@ def create_certificate(crds, namespace, secretname, routes, cls, annotations):
         logging.info(f"Ignoring {namespace}/{secretname} (ignore=true)")
         return
 
+    try:
+        assert crds.get_namespaced_custom_object(CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname)
+        logging.info(f"{secretname} : certificate request already exists.")
+        return
+    except ApiException:
+        pass
+
     # Determine issuerRef priority
     if 'cert-manager.io/cluster-issuer' in annotations:
         issuer_kind = 'ClusterIssuer'
@@ -85,10 +92,7 @@ def create_certificate(crds, namespace, secretname, routes, cls, annotations):
             },
         }
         try:
-            crds.get_namespaced_custom_object(
-                CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname
-            )
-            crds.patch_namespaced_custom_object(
+            crds.create_namespaced_custom_object(
                 CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, body
             )
         except ApiException as e:
