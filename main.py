@@ -6,11 +6,28 @@ import re
 import signal
 import sys
 import threading
-import time
+import uuid
 
+
+from functools import partial
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
+from kubernetes.leaderelection import leaderelection, electionconfig
+from kubernetes.leaderelection.resourcelock.configmaplock import ConfigMapLock
 from dotenv import load_dotenv
+
+
+class LeaseFilter(logging.Filter):
+    def filter(self, record):
+        # only drop the library’s own lease‑acquire log
+        msg = record.getMessage()
+        if msg.startswith("leader ") and msg.endswith("has successfully acquired lease"):
+            return False
+        return True
+
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger().addFilter(LeaseFilter())
 
 # Load environment variables
 load_dotenv()
@@ -27,6 +44,25 @@ CERT_PLURAL = "certificates"
 CERT_CLEANUP = os.getenv("CERT_CLEANUP", "false").lower() in ("yes", "true", "t", "1")
 PATCH_SECRETNAME = os.getenv("PATCH_SECRETNAME", "false").lower() in ("yes", "true", "t", "1")
 SUPPORT_LEGACY_CRDS = os.getenv("SUPPORT_LEGACY_CRDS", "true").lower() in ("yes", "true", "t", "1")
+
+# Global stop event for watcher threads
+STOP_EVENT = threading.Event()
+USE_LOCAL_CONFIG = False  # set in main()
+
+
+def get_candidate_id():
+    # 1) Use the K8s‐injected POD_NAME if present
+    pod = os.getenv("POD_NAME")
+    if pod:
+        return pod
+
+    # 2) Otherwise, fall back to HOSTNAME if set
+    host = os.getenv("HOSTNAME")
+    if host:
+        return host
+
+    # 3) Finally, generate a random local ID
+    return f"local-{uuid.uuid4().hex[:8]}"
 
 
 def safe_get(obj, keys, default=None):
@@ -137,22 +173,24 @@ def delete_certificate(crds, namespace, secretname):
             )
 
 
-def watch_crd(group, version, plural, use_local_config=False):
+def watch_crd(group, version, plural):
     """Watch Traefik IngressRoute CRD and manage certificates."""
-    if use_local_config:
+    global USE_LOCAL_CONFIG
+    if USE_LOCAL_CONFIG:
         config.load_kube_config()
     else:
         config.load_incluster_config()
     crds = client.CustomObjectsApi()
     resource_version = ''
-
     logging.info(f"Watching {group}/{version}/{plural}")
-    while True:
+    w = watch.Watch()
+
+    while not STOP_EVENT.is_set():
         try:
-            stream = watch.Watch().stream(
+            stream = w.stream(
                 crds.list_cluster_custom_object,
                 group=group, version=version, plural=plural,
-                resource_version=resource_version
+                resource_version=resource_version, timeout_seconds=10
             )
             for event in stream:
                 t = event['type']
@@ -185,33 +223,57 @@ def watch_crd(group, version, plural, use_local_config=False):
                 else:
                     logging.info(f"{ns}/{name} : unknown event type: {t}")
                     logging.debug(json.dumps(obj, indent=2))
-
         except Exception as e:
             logging.warning(f"Stream failed: {e}")
-            time.sleep(1)
-            continue
+
+    logging.info(f"Watcher for {group}/{version}/{plural} exiting")
+
+
+def on_started_leading(candidate_id):
+    """Start watchers when elected leader."""
+    logging.info(f"{candidate_id} has become leader, starting watchers")
+    STOP_EVENT.clear()
+    threading.Thread(
+        target=watch_crd,
+        args=("traefik.io", "v1alpha1", "ingressroutes"),
+        daemon=True
+    ).start()
+
+    if SUPPORT_LEGACY_CRDS:
+        # deprecated traefik CRD
+        threading.Thread(
+            target=watch_crd,
+            args=("traefik.containo.us", "v1alpha1", "ingressroutes"),
+            daemon=True
+        ).start()
+
+
+def on_stopped_leading():
+    """Stop watchers on leadership loss."""
+    logging.info("Lost leadership, stopping watchers")
+    STOP_EVENT.set()
 
 
 def exit_gracefully(signum, frame):
     """Handle termination signals and exit cleanly."""
-    logging.info(f"Shutting down gracefully on signal: {signal.Signals(signum).name}({signum})")
+    logging.info(f"Signal {signal.Signals(signum).name} received, shutting down")
+    STOP_EVENT.set()
     sys.exit(0)
 
 
 def main():
-    """Parse args, initialize logging, and start watchers."""
+    """Parse args, initialize logging, and start leader election."""
+    global USE_LOCAL_CONFIG
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--local", action="store_true", help="Use local kubeconfig"
-    )
+    parser.add_argument("--local", action="store_true", help="Use local kubeconfig")
     args = parser.parse_args()
 
+    USE_LOCAL_CONFIG = args.local
     if args.local:
         config.load_kube_config()
     else:
         config.load_incluster_config()
 
-    logging.basicConfig(level=logging.INFO)
     logging.info("Starting traefik-cert-manager")
     logging.info(f"Using cert-manager: {CERT_GROUP}/{CERT_VERSION}/{CERT_PLURAL}")
     logging.info(f"Fallback issuer={ISSUER_KIND_DEFAULT}/{ISSUER_NAME_DEFAULT}")
@@ -222,47 +284,31 @@ def main():
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
 
-    # Start Traefik CRD watchers
-    th1 = threading.Thread(
-        target=watch_crd,
-        args=(
-            "traefik.io",
-            "v1alpha1",
-            "ingressroutes",
-            args.local
-        ),
-        daemon=True
+    candidate_id = get_candidate_id()
+    namespace = os.getenv("POD_NAMESPACE", "default")
+    lock = ConfigMapLock("traefik-cert-manager-leader-lock", namespace, candidate_id)
+    onstart = partial(on_started_leading, candidate_id)
+
+    le_cfg = electionconfig.Config(
+        lock,
+        lease_duration=17,
+        renew_deadline=15,
+        retry_period=5,
+        onstarted_leading=onstart,
+        onstopped_leading=on_stopped_leading
     )
-    th1.start()
 
-    if SUPPORT_LEGACY_CRDS:
-        # deprecated traefik CRD
-        th2 = threading.Thread(
-            target=watch_crd,
-            args=(
-                "traefik.containo.us",
-                "v1alpha1",
-                "ingressroutes",
-                args.local
-            ),
-            daemon=True
-        )
-        th2.start()
+    logging.info("Starting leader election")
+    try:
+        leaderelection.LeaderElection(le_cfg).run()
+    except KeyboardInterrupt:
+        logging.info("Interrupted, shutting down")
+        STOP_EVENT.set()
 
-        # wait for threads to finish
-        while th1.is_alive() and th2.is_alive():
-            th1.join()
-            th2.join()
-        logging.info(f"traefik.containo.us/v1alpha1/ingressroutes watcher exited {th2.is_alive()}")
-    else:
-        # wait for threads to finish
-        while th1.is_alive():
-            th1.join()
-    logging.info("Watchers exited")
+    # Wait for watcher threads to exit
+    STOP_EVENT.wait()
+    logging.info("Shutdown complete")
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     main()
-    logging.info("Exiting")
-    sys.exit(0)
