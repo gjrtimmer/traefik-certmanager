@@ -194,7 +194,7 @@ def watch_crd(group, version, plural, use_local_config=False):
 
 def exit_gracefully(signum, frame):
     """Handle termination signals and exit cleanly."""
-    logging.info(f"Shutting down gracefully on signal: {signal.Signals(signum).name}")
+    logging.info(f"Shutting down gracefully on signal: {signal.Signals(signum).name}({signum})")
     sys.exit(0)
 
 
