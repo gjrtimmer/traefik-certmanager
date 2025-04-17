@@ -30,7 +30,7 @@ SUPPORT_LEGACY_CRDS = os.getenv("SUPPORT_LEGACY_CRDS", "true").lower() in ("yes"
 
 
 def safe_get(obj, keys, default=None):
-    """Get a value from the given dict. The key is in json format, separated by a period."""
+    """Get a nested value from dict using dot-separated keys."""
     v = obj
     for k in keys.split('.'):
         if k not in v:
@@ -39,67 +39,87 @@ def safe_get(obj, keys, default=None):
     return v
 
 
-def create_certificate(crds, namespace, secretname, routes, cls, annotations):
-    """Create or update a cert-manager Certificate per route Rule hosts."""
+def reconcile_certificate(crds, namespace, name, secretname, routes, annotations):
+    """Create or patch Certificate when annotations or hosts change."""
     # Skip if ignore annotation set
     if annotations.get('cert-manager.io/ignore', '').lower() == 'true':
         logging.info(f"Ignoring {namespace}/{secretname} (ignore=true)")
         return
 
-    try:
-        assert crds.get_namespaced_custom_object(CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname)
-        logging.info(f"{secretname} : certificate request already exists.")
-        return
-    except ApiException:
-        pass
-
-    # Determine issuerRef priority
-    if 'cert-manager.io/cluster-issuer' in annotations:
-        issuer_kind = 'ClusterIssuer'
-        issuer_name = annotations['cert-manager.io/cluster-issuer']
-    elif 'cert-manager.io/issuer' in annotations:
-        issuer_kind = annotations.get('cert-manager.io/issuer-kind', 'Issuer')
-        issuer_name = annotations['cert-manager.io/issuer']
-    else:
-        issuer_kind = ISSUER_KIND_DEFAULT
-        issuer_name = ISSUER_NAME_DEFAULT
-
-    # Per-route rule certificate
-    for route in routes or []:
-        if route.get('kind') != 'Rule' or 'Host' not in route.get('match', ''):
-            continue
-
-        hostmatch = re.findall(r"Host\(([^\)]*)\)", route["match"])
-        hosts = re.findall(r'`([^`]*?)`', ",".join(hostmatch))
-
-        if not hosts:
-            logging.info(f"No hosts for {namespace}/{secretname} rule; skipping")
-            continue
-
-        logging.info(
-            f"Processing {namespace}/{secretname} class={cls or 'none'} "
-            f"issuerRef={issuer_kind}/{issuer_name} hosts={hosts}"
+    # Handle missing secretName
+    if not secretname and PATCH_SECRETNAME:
+        logging.info(f"{namespace}/{name}: no secretName, patching")
+        patch = {'spec': {'tls': {'secretName': name}}}
+        crds.patch_namespaced_custom_object(
+            CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, name, patch
         )
+        secretname = name
+    else:
+        logging.info(f"{namespace}/{name}: no secretName, skipping")
+        return
 
+    # Resolve desired issuerRef
+    if 'cert-manager.io/cluster-issuer' in annotations:
+        desired_kind = 'ClusterIssuer'
+        desired_name = annotations['cert-manager.io/cluster-issuer']
+    elif 'cert-manager.io/issuer' in annotations:
+        desired_kind = annotations.get('cert-manager.io/issuer-kind', 'Issuer')
+        desired_name = annotations['cert-manager.io/issuer']
+    else:
+        desired_kind = ISSUER_KIND_DEFAULT
+        desired_name = ISSUER_NAME_DEFAULT
+
+    # Collect hosts
+    desired_hosts = []
+    for route in routes or []:
+        if route.get('kind') == 'Rule' and 'Host' in route.get('match', ''):
+            hostmatch = re.findall(r"Host\(([^)]+)\)", route['match'])
+            desired_hosts.extend(re.findall(r'`([^`]+)`', ','.join(hostmatch)))
+    if not desired_hosts:
+        logging.info(f"{namespace}/{secretname}: no hosts, skipping")
+        return
+
+    # Desired spec
+    desired_spec = {
+        'issuerRef': {'name': desired_name, 'kind': desired_kind},
+        'dnsNames': desired_hosts,
+    }
+
+    try:
+        # Fetch existing
+        cert = crds.get_namespaced_custom_object(
+            CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname
+        )
+        existing = cert.get('spec', {})
+        existing_ref = existing.get('issuerRef', {})
+        existing_hosts = existing.get('dnsNames', [])
+        # Compare
+        if (existing_ref.get('kind') != desired_kind or
+                existing_ref.get('name') != desired_name or
+                set(existing_hosts) != set(desired_hosts)):
+            # Patch
+            patch_body = {'spec': desired_spec}
+            crds.patch_namespaced_custom_object(
+                CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname, patch_body
+            )
+            logging.info(
+                f"Patched Certificate {secretname} (issuerRef {existing_ref}→{desired_kind}/{desired_name}; "
+                f"hosts {existing_hosts}→{desired_hosts})"
+            )
+        else:
+            logging.info(f"No update required for Certificate {secretname}")
+    except ApiException:
+        # Create new
         body = {
             'apiVersion': f"{CERT_GROUP}/{CERT_VERSION}",
             'kind': CERT_KIND,
             'metadata': {'name': secretname},
-            'spec': {
-                'dnsNames': hosts,
-                'secretName': secretname,
-                'issuerRef': {'name': issuer_name, 'kind': issuer_kind},
-            },
+            'spec': {'secretName': secretname, **desired_spec}
         }
-        try:
-            crds.create_namespaced_custom_object(
-                CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, body
-            )
-        except ApiException as e:
-            logging.exception(
-                "Exception when calling CustomObjectsApi->create_namespaced_custom_object:",
-                e,
-            )
+        crds.create_namespaced_custom_object(
+            CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, body
+        )
+        logging.info(f"Requested Certificate {secretname} for hosts {desired_hosts}")
 
 
 def delete_certificate(crds, namespace, secretname):
@@ -113,8 +133,7 @@ def delete_certificate(crds, namespace, secretname):
             logging.info(f"Deleted Certificate {secretname}")
         except ApiException as e:
             logging.exception(
-                "Exception when calling CustomObjectsApi->delete_namespaced_custom_object:",
-                e,
+                "Exception when calling CustomObjectsApi->delete_namespaced_custom_object:", e
             )
 
 
@@ -132,9 +151,7 @@ def watch_crd(group, version, plural, use_local_config=False):
         try:
             stream = watch.Watch().stream(
                 crds.list_cluster_custom_object,
-                group=group,
-                version=version,
-                plural=plural,
+                group=group, version=version, plural=plural,
                 resource_version=resource_version
             )
             for event in stream:
@@ -144,7 +161,7 @@ def watch_crd(group, version, plural, use_local_config=False):
                 resource_version = safe_get(
                     obj, 'metadata.resourceVersion', resource_version
                 )
-                namespace = safe_get(obj, 'metadata.namespace')
+                ns = safe_get(obj, 'metadata.namespace')
                 name = safe_get(obj, 'metadata.name')
                 annotations = obj.get('metadata', {}).get('annotations', {})
                 cls = annotations.get('kubernetes.io/ingress.class', '')
@@ -153,46 +170,20 @@ def watch_crd(group, version, plural, use_local_config=False):
 
                 # Skip or filter
                 if annotations.get('cert-manager.io/ignore', '').lower() == 'true':
-                    logging.info(f"Ignoring {namespace}/{name}")
+                    logging.info(f"Ignoring {ns}/{name}")
                     continue
                 if FILTER_SET and cls not in FILTER_SET:
-                    logging.info(f"Skipping {namespace}/{name} ingress.class={cls}")
+                    logging.info(f"Skipping {ns}/{name} ingress.class={cls}")
                     continue
 
                 if t in ('ADDED', 'MODIFIED'):
-                    if not secretname and PATCH_SECRETNAME:
-                        logging.info(
-                            f"{namespace}/{name} : No secretName found, patching"
-                        )
-                        patch = {'spec': {'tls': {'secretName': name}}}
-                        crds.patch_namespaced_custom_object(
-                            group, version, namespace, plural, name, patch
-                        )
-                        secretname = name
-                    if secretname:
-                        create_certificate(
-                            crds,
-                            namespace,
-                            secretname,
-                            routes,
-                            cls,
-                            annotations
-                        )
-                    else:
-                        logging.info(
-                            f"{namespace}/{name} : no secretName found, skipping"
-                        )
+                    reconcile_certificate(
+                        crds, ns, name, secretname, routes, annotations
+                    )
                 elif t == 'DELETED':
-                    if not secretname and PATCH_SECRETNAME:
-                        secretname = name
-
-                    if secretname:
-                        delete_certificate(crds, namespace, secretname)
-                    else:
-                        logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, skipping delete")
-
+                    delete_certificate(crds, ns, name)
                 else:
-                    logging.info(f"{namespace}/{name} : unknown event type: {t}")
+                    logging.info(f"{ns}/{name} : unknown event type: {t}")
                     logging.debug(json.dumps(obj, indent=2))
 
         except Exception as e:
