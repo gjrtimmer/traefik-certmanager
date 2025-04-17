@@ -264,3 +264,5 @@ def main():
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     main()
+    logging.info("Exiting")
+    sys.exit(0)
