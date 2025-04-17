@@ -6,8 +6,10 @@ import re
 import signal
 import sys
 import threading
+import uuid
 
 
+from functools import partial
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
 from kubernetes.leaderelection import leaderelection, electionconfig
@@ -17,7 +19,11 @@ from dotenv import load_dotenv
 
 class LeaseFilter(logging.Filter):
     def filter(self, record):
-        return 'successfully acquired lease' not in record.getMessage()
+        # only drop the library’s own lease‑acquire log
+        msg = record.getMessage()
+        if msg.startswith("leader ") and msg.endswith("has successfully acquired lease"):
+            return False
+        return True
 
 
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +48,21 @@ SUPPORT_LEGACY_CRDS = os.getenv("SUPPORT_LEGACY_CRDS", "true").lower() in ("yes"
 # Global stop event for watcher threads
 STOP_EVENT = threading.Event()
 USE_LOCAL_CONFIG = False  # set in main()
+
+
+def get_candidate_id():
+    # 1) Use the K8s‐injected POD_NAME if present
+    pod = os.getenv("POD_NAME")
+    if pod:
+        return pod
+
+    # 2) Otherwise, fall back to HOSTNAME if set
+    host = os.getenv("HOSTNAME")
+    if host:
+        return host
+
+    # 3) Finally, generate a random local ID
+    return f"local-{uuid.uuid4().hex[:8]}"
 
 
 def safe_get(obj, keys, default=None):
@@ -208,8 +229,9 @@ def watch_crd(group, version, plural):
     logging.info(f"Watcher for {group}/{version}/{plural} exiting")
 
 
-def on_started_leading():
+def on_started_leading(candidate_id):
     """Start watchers when elected leader."""
+    logging.info(f"{candidate_id} has become leader, starting watchers")
     STOP_EVENT.clear()
     threading.Thread(
         target=watch_crd,
@@ -262,16 +284,17 @@ def main():
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
 
-    candidate_id = os.getenv("POD_NAME", "cert-watcher")
+    candidate_id = get_candidate_id()
     namespace = os.getenv("POD_NAMESPACE", "default")
     lock = ConfigMapLock("cert-watcher-leader-lock", namespace, candidate_id)
+    onstart = partial(on_started_leading, candidate_id)
 
     le_cfg = electionconfig.Config(
         lock,
         lease_duration=17,
         renew_deadline=15,
         retry_period=5,
-        onstarted_leading=on_started_leading,
+        onstarted_leading=onstart,
         onstopped_leading=on_stopped_leading
     )
 
