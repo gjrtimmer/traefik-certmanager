@@ -181,12 +181,12 @@ def watch_crd(group, version, plural, use_local_config=False):
                 elif t == 'DELETED':
                     if not secretname and PATCH_SECRETNAME:
                         secretname = name
-                    
+
                     if secretname:
                         delete_certificate(crds, namespace, secretname)
                     else:
                         logging.info(f"{namespace}/{name} : no secretName found in IngressRoute, skipping delete")
-                    
+
                 else:
                     logging.info(f"{namespace}/{name} : unknown event type: {t}")
                     logging.debug(json.dumps(obj, indent=2))
@@ -243,7 +243,7 @@ def main():
     if SUPPORT_LEGACY_CRDS:
         # deprecated traefik CRD
         th2 = threading.Thread(
-            target=watch_crd, 
+            target=watch_crd,
             args=(
                 "traefik.containo.us",
                 "v1alpha1",
