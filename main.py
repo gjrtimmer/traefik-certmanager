@@ -15,6 +15,8 @@ from kubernetes.client.rest import ApiException
 from kubernetes.leaderelection import electionconfig, leaderelection
 from kubernetes.leaderelection.resourcelock.configmaplock import ConfigMapLock
 
+__version__ = "1.1.0"
+
 
 class LeaseFilter(logging.Filter):
     def filter(self, record):
