@@ -1,0 +1,64 @@
+# .github/workflows/release.yml
+
+name: Release
+
+on:
+  push:
+    # match tags like "1.2.3" (no "v" prefix)
+    tags:
+      - '*.*.*'
+
+permissions:
+  contents: write    # to push commits/tags if needed
+  actions: write     # to create the GitHub Release
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Parse version & changelog
+        id: release_info
+        shell: bash
+        run: |
+          # use the tag name directly (e.g. "1.2.3")
+          version="${GITHUB_REF#refs/tags/}"
+
+          # extract the first section under the top-level "## " heading
+          in_section=false
+          changelog=""
+          while IFS= read -r line; do
+            if [[ "$line" =~ ^##[[:space:]] ]]; then
+              in_section=true
+              continue
+            fi
+            if $in_section && [[ "$line" =~ ^##[[:space:]] ]]; then
+              break
+            fi
+            if $in_section; then
+              changelog+="$line"$'\n'
+            fi
+          done < CHANGELOG.md
+
+          # escape newlines for GitHub output
+          safe_body="${changelog//$'\n'/'%0A'}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "body=$safe_body"  >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # use the tag exactly as pushed, e.g. "1.2.3"
+          tag_name:     ${{ github.ref_name }}
+          # release title same as the tag
+          release_name: Release ${{ steps.release_info.outputs.version }}
+          body:         ${{ steps.release_info.outputs.body }}
+          draft:        false
+          prerelease:   false
