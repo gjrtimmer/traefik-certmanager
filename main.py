@@ -194,7 +194,6 @@ def delete_certificate(crds, namespace, secretname):
 
 def watch_crd(group, version, plural):
     """Watch Traefik IngressRoute CRD and manage certificates."""
-    global USE_LOCAL_CONFIG  # pylint: disable=global-statement,global-variable-not-assigned
     if USE_LOCAL_CONFIG:
         config.load_kube_config()
     else:
