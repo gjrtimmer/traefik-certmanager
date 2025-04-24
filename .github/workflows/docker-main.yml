@@ -1,5 +1,5 @@
 ---
-name: Docker Latest
+name: Docker (main)
 
 on:
   push:
@@ -37,6 +37,6 @@ jobs:
           context: .
           push: true
           platforms: ${{ env.PLATFORM }}
-          tags: ${{ vars.DOCKERHUB_ORG }}/${{ github.event.repository.name }}:latest
+          tags: ${{ vars.DOCKERHUB_ORG }}/${{ github.event.repository.name }}:main
           build-args: |
-            VERSION=latest
+            VERSION=main
