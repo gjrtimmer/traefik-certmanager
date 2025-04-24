@@ -50,14 +50,18 @@ spec:
       serviceAccount: traefik-certmanager
       containers:
       - name: traefik-certmanager
-        image: kooper/traefik-certmanager
+        image: gjrtimmer/traefik-certmanager:latest
         imagePullPolicy: Always
         env:
-        - name: ISSUER_NAME
+        - name: INGRESS_CLASS_FILTER
+          value: ""
+        - name: ISSUER_NAME_DEFAULT
           value: letsencrypt
-        - name: ISSUER_KIND
+        - name: ISSUER_KIND_DEFAULT
           value: ClusterIssuer
         - name: CERT_CLEANUP
           value: "false"
         - name: PATCH_SECRETNAME
           value: "true"
+        - name: SUPPORT_LEGACY_CRDS
+          value: "false"
