@@ -8,6 +8,7 @@ on:
 
 env:
   PLATFORM: linux/amd64,linux/arm64,linux/arm/v7
+  DOCKERHUB_REPO: ${{ vars.DOCKERHUB_ORG }}/${{ github.event.repository.name }}
 
 jobs:
   docker:
@@ -37,6 +38,13 @@ jobs:
           context: .
           push: true
           platforms: ${{ env.PLATFORM }}
-          tags: ${{ vars.DOCKERHUB_ORG }}/${{ github.event.repository.name }}:main
+          tags: ${{ env.DOCKERHUB_REPO }}:main
           build-args: |
             VERSION=main
+
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: ${{ env.DOCKERHUB_REPO }}
