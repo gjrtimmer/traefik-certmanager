@@ -1,27 +1,23 @@
-This will create a certificate request for IngressRoute objects for Traefik. 
+# Traefik CertManager
 
-# Installing Cert-Manager and Traefik
+The Traefik CertManager manages the handling of certificates of Traefik IngressRoutes.
 
-The default values assume you have cert-manager installed, see also [cert-manager installation](https://cert-manager.io/docs/installation/helm/):
+[Cert Manager](https://cert-manager.io) handles only default Kubernetes `Ingress` kind.
+This manager provides the management so that the [Cert Manager](https://cert-manager.io) can provide certicates for the Traefik `IngressRoute` kind.
 
-```bash
-helm install \
-  cert-manager jetstack/cert-manager \
-  --namespace cert-manager \
-  --create-namespace \
-  --version v1.9.1 \
-  --set installCRDs=true
-```
+## Prerequisites
 
-As well as Traefik, see also [traefik installation](https://doc.traefik.io/traefik/getting-started/install-traefik/#use-the-helm-chart):
+The following prerequisites must be met before the Traefik CertManager can be used.
 
-```
-helm install \
-	traefik traefik/traefik \
-  --namespace cert-manager \
-  --create-namespace \
+- [Cert Manager](https://cert-manager.io)
+- [Traefik](https://traefik.io)
+- [Traefik Custom Resource Definition (CRD)](https://doc.traefik.io/traefik/reference/dynamic-configuration/kubernetes-crd/)
 
-```
+See the [Install documentation](./docs/INSTALL.md)
+
+## Install
+
+See the [Install documentation](./docs/INSTALL.md) for how to install the Traefik CertManager and all prerequisites.
 
 ## Adding ClusterIssuer to Cert-Manager
 
