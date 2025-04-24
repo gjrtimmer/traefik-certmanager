@@ -1,0 +1,43 @@
+{
+    "convention": {
+        "commitTypes": [
+            "feat",
+            "fix",
+            "perf",
+            "merge",
+            "docs",
+            "bot",
+            "refactor",
+            "style",
+            "test",
+            "build",
+            "ops",
+            "revert",
+            "chore"
+        ],
+        "releaseTagGlobPattern": "[0-9]\\.[0-9]\\.[0-9]*",
+        "issueRegexPattern": "(^|\\s)#\\d+(\\s|$)"
+    },
+    "changelog": {
+        "date": "quote",
+        "commitTypes": [
+            "feat",
+            "fix",
+            "perf",
+            "refactor",
+            "deps"
+        ],
+        "commitIgnoreRegexPattern": "^WIP ",
+        "headlines": {
+            "deps": "Dependencies",
+            "feat": "Features",
+            "fix": "Bug Fixes",
+            "perf": "Performance Improvements",
+            "refactor": "Code Refactoring",
+            "breakingChange": "BREAKING CHANGES"
+        },
+        "commitUrl": "",
+        "commitRangeUrl": "",
+        "issueUrl": ""
+    }
+}

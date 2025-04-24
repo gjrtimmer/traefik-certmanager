@@ -1,7 +1,5 @@
 {
-  "name": "traefik-certmanager",
-  "description": "A Traefik plugin for managing Let's Encrypt certificates",
   "devDependencies": {
-    "conventional-changelog-cli": "^5.0.0"
+    "git-conventional-commits": "^2.8.0"
   }
 }
