@@ -37,6 +37,8 @@ jobs:
         with:
           context: .
           push: true
+          cache-from: type=gha
+          cache-to: type=gha
           platforms: ${{ env.PLATFORM }}
           tags: ${{ env.DOCKERHUB_REPO }}:main
           build-args: |
