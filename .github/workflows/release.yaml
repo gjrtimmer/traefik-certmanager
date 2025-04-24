@@ -1,10 +1,9 @@
 # .github/workflows/release.yml
-
+---
 name: Release
 
 on:
   push:
-    # match tags like "1.2.3" (no "v" prefix)
     tags:
       - '*.*.*'
 
