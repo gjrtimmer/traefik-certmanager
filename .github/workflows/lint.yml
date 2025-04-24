@@ -1,6 +1,6 @@
 # code: language=yaml
 ---
-name: lint_static_checks
+name: linter
 
 on:
   push:

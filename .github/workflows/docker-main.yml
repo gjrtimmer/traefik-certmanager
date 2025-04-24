@@ -1,5 +1,5 @@
 ---
-name: Docker (main)
+name: docker-main
 
 on:
   push:
