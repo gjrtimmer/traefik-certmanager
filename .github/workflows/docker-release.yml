@@ -40,7 +40,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha
           platforms: ${{ env.PLATFORM }}
-          tags: ${{ env.DOCKERHUB_REPO }}:$${GITHUB_REF##*/}
+          tags: |
+            ${{ env.DOCKERHUB_REPO }}:$${GITHUB_REF##*/}
+            ${{ env.DOCKERHUB_REPO }}:latest
           build-args: |
             VERSION=${GITHUB_REF##*/}
 
