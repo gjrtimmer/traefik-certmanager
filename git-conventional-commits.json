@@ -13,7 +13,8 @@
             "build",
             "ops",
             "revert",
-            "chore"
+            "chore",
+            "release"
         ],
         "releaseTagGlobPattern": "[0-9]\\.[0-9]\\.[0-9]*",
         "issueRegexPattern": "(^|\\s)#\\d+(\\s|$)"
@@ -25,8 +26,12 @@
             "fix",
             "perf",
             "refactor",
-            "deps"
+            "deps",
+            "chore",
+            "ops",
+            "merge"
         ],
+        "includeInvalidCommits": false,
         "commitIgnoreRegexPattern": "^WIP ",
         "headlines": {
             "deps": "Dependencies",
@@ -34,7 +39,10 @@
             "fix": "Bug Fixes",
             "perf": "Performance Improvements",
             "refactor": "Code Refactoring",
-            "breakingChange": "BREAKING CHANGES"
+            "breakingChange": "BREAKING CHANGES",
+            "chore": "Project Maintenance",
+            "ops": "Operations / Workflow Improvements",
+            "merge": "Improvements"
         },
         "commitUrl": "",
         "commitRangeUrl": "",
