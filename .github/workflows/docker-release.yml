@@ -44,5 +44,5 @@ jobs:
             ${{ env.DOCKERHUB_REPO }}:${{ github.ref_name }}
             ${{ env.DOCKERHUB_REPO }}:latest
           build-args: |
-            VERSION=${GITHUB_REF##*/}
+            VERSION=${{ github.ref_name }}
 
