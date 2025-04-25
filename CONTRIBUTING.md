@@ -123,13 +123,13 @@ We use bump2version for Python version bumps and changelog headers, and Conventi
 1. Bump version (updates __version__ and the first changelog header; no commit/tag):
 
     ```shell
-    bump2version patch --no-commit --no-tag
+    bump2version --no-commit --no-tag --new-version "{VERSION}" {PART}
     ```
 
 2. Generate changelog section:
 
     ```shell
-    npx conventional-changelog -p conventionalcommits -i CHANGELOG.md -s --release-count 1
+    git-conventional-commits changelog -f CHANGELOG.md -r "{VERSION}"
     ```
 
 3. Inspect main.py and CHANGELOG.md.
