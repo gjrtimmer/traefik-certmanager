@@ -1,4 +1,4 @@
-## **2.0.0-rc3** <sub><sup>2025-04-25 (47d581a...e9f680c)</sup></sub>
+## **2.0.0-rc4** <sub><sup>2025-04-25 (47d581a...7abd7b6)</sup></sub>
 
 ### Project Maintenance
 *  config flake8 (0c8273c)
@@ -76,6 +76,7 @@
 *  add certmanager helmfile deployment (d9e368d)
 *  fix release pipeline (f1675dc)
 *  fix docker release tag (e9f680c)
+*  fix docker release (7abd7b6)
 
 
 ### Code Refactoring
