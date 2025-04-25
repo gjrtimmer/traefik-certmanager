@@ -1,5 +1,9 @@
 # Traefik CertManager
 
+> [!NOTE]
+> 
+> Current Release: 1.1.0
+
 The Traefik CertManager manages the handling of certificates of Traefik IngressRoutes, this repository is a fork of the original traefik-certmanager which was created by [Rob Kooper](https://github.com/robkooper).
 
 [Cert Manager](https://cert-manager.io) handles only default Kubernetes `Ingress` kind.
