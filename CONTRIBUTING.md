@@ -122,8 +122,28 @@ We use bump2version for Python version bumps and changelog headers, and Conventi
 
 1. Bump version (updates __version__ and the first changelog header; no commit/tag):
 
+    Update Major
+
     ```shell
-    bump2version --no-commit --no-tag --new-version "{VERSION}" {PART}
+    bumpver update --major
+    ```
+
+    Update Minor
+
+    ```shell
+    bumpver update --minor
+    ```
+
+    Update Patch
+
+    ```shell
+    bumpver update --minor
+    ```
+
+    Create Release Candidate
+
+    ```shell
+    bumpver update --tag rc --tag-num
     ```
 
 2. Generate changelog section:

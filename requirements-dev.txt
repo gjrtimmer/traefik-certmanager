@@ -3,4 +3,5 @@ isort
 flake8
 mypy
 pre-commit
-bump2version
+bumpver
+toml
