@@ -46,6 +46,9 @@ jobs:
       
           # write the real unescaped changelog to file
           printf "%b" "$changelog" > RELEASE.md
+
+          # Copy Release Info for Chart Release Info
+          cp RELEASE.md charts/traefik-certmanager/RELEASE.md
       
           # only output the version (no need for changelog anymore)
           echo "version=$version" >> "$GITHUB_OUTPUT"
@@ -63,7 +66,7 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
+          git config user.name "G.J.R. Timmer"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Run chart-releaser
