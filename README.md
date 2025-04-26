@@ -19,11 +19,11 @@ The following prerequisites must be met before the Traefik CertManager can be us
 - [Traefik](https://traefik.io)
 - [Traefik Custom Resource Definition (CRD)](https://doc.traefik.io/traefik/reference/dynamic-configuration/kubernetes-crd/)
 
-See the [Install documentation](./docs/INSTALL.md)
+See the [Install documentation](./INSTALL.md)
 
 ## Install
 
-See the [Install documentation](./docs/INSTALL.md) for how to install the Traefik CertManager and all prerequisites.
+See the [Install documentation](./INSTALL.md) for how to install the Traefik CertManager and all prerequisites.
 
 ## Features
 

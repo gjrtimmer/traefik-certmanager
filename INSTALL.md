@@ -1,8 +1,8 @@
-# Install Traefik CertManager
+# Install
 
 - [Install CertManager](#install-certmanager)
 - [Install Traefik](#install-traefik)
-- [Install Traefik CertManager](#install-traefik-certmanager-1)
+- [Install Traefik CertManager](#install-traefik-certmanager)
 
 ## Install CertManager
 
@@ -11,7 +11,7 @@ Either use `helm` install below or with `helmfile` with the provided manifest.
 The default values assume you have cert-manager installed, see also [cert-manager installation](https://cert-manager.io/docs/installation/helm/):
 
 > **Helmfile**
-> 
+>
 > ```shell
 > helmfile --file ./manifests/cert-manager/helmfile.yaml apply
 > ```
@@ -32,9 +32,8 @@ Either use `helm` install below or with `helmfile` with the provided manifest.
 
 As well as Traefik, see also [traefik installation](https://doc.traefik.io/traefik/getting-started/install-traefik/#use-the-helm-chart):
 
-
 > **Helmfile**
-> 
+>
 > ```shell
 > helmfile --file ./manifests/traefik/helmfile.yaml apply
 > ```
@@ -43,7 +42,7 @@ As well as Traefik, see also [traefik installation](https://doc.traefik.io/traef
 >
 > ```shell
 > helm install \
-> 	traefik traefik/traefik \
+>   traefik traefik/traefik \
 >   --namespace traefik \
 >   --create-namespace
 > ```
@@ -56,7 +55,7 @@ For installation a standard `helmfile` deployment has been added to this reposit
 Please see the main [README](../README.md) for configuration.
 
 > **Helmfile**
-> 
+>
 > ```shell
 > helmfile --file ./manifests/traefik-certmanager/helmfile.yaml apply
 > ```
