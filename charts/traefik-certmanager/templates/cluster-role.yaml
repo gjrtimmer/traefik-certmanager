@@ -1,0 +1,21 @@
+{{ if .Values.rbac.create }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "traefik-certmanager.serviceAccountName" . }}
+  labels:
+    {{- include "traefik-certmanager.labels" . | nindent 4 }}
+rules:
+- apiGroups: ["traefik.containo.us"]
+  resources: ["ingressroutes"]
+  verbs: ["watch", "patch"]
+- apiGroups: ["traefik.io"]
+  resources: ["ingressroutes"]
+  verbs: ["watch", "patch"]
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificates"]
+  verbs: ["get", "create", "delete"]
+- apiGroups: [""]
+  resources: ["configmaps", "leases"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+{{ end }}

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "traefik-certmanager.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "traefik-certmanager.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "traefik-certmanager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "traefik-certmanager.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "traefik-certmanager.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: INGRESS_CLASS_FILTER
+            value: {{ .Values.options.ingressClassFilter | quote | default "" }}
+          - name: ISSUER_NAME_DEFAULT
+            value: {{ .Values.options.issuer.default.name | quote | default "letsencrypt" }}
+          - name: ISSUER_KIND_DEFAULT
+            value: {{ .Values.options.issuer.default.kind | quote | default "ClusterIssuer" }}
+          - name: CERT_CLEANUP
+            value:  {{ .Values.options.certCleanup | quote | default "false" }}
+          - name: PATCH_SECRETNAME
+            value: {{ .Values.options.patchSecretName | quote | default "false" }}
+          - name: SUPPORT_LEGACY_CRDS
+            value: {{ .Values.options.supportLegacyCRDs | quote | default "false" }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
