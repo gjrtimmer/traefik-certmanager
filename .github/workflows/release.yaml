@@ -32,15 +32,15 @@ jobs:
           in_section=false
           changelog=""
           while IFS= read -r line; do
+            if $in_section && [[ "$line" =~ ^##[[:space:]] ]]; then
+              break
+            fi
             if [[ "$line" =~ ^##[[:space:]] ]]; then
               in_section=true
               continue
             fi
-            if $in_section && [[ "$line" =~ ^##[[:space:]] ]]; then
-              break
-            fi
             if $in_section; then
-              changelog+="$line"$'\n'
+              changelog+="${line}\n"
             fi
           done < CHANGELOG.md
 
