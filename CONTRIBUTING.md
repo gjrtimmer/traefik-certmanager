@@ -149,7 +149,7 @@ We use bump2version for Python version bumps and changelog headers, and Conventi
 2. Generate changelog section:
 
     ```shell
-    git-conventional-commits changelog -f CHANGELOG.md -r "{VERSION}"
+    npx git-conventional-commits changelog -f CHANGELOG.md -r "{VERSION}"
     ```
 
 3. Inspect main.py and CHANGELOG.md.
