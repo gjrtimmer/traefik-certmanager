@@ -1,4 +1,4 @@
-## **2.0.0-rc5**&emsp;<sub><sup>2025-04-26 ([47d581a...5534933](https://github.com/gjrtimmer/traefik-certmanager/compare/47d581a6ac1d44de991097a67e4d00de74985b74...55349338d2840ea6e2fcd84cbc34e01b9a4c093a?diff=split))</sup></sub>
+## **2.0.0-rc6**&emsp;<sub><sup>2025-04-26 ([47d581a...64723e3](https://github.com/gjrtimmer/traefik-certmanager/compare/47d581a6ac1d44de991097a67e4d00de74985b74...64723e30d48a33bd701440220485e8cbf0555eb4?diff=split))</sup></sub>
 
 ### Maintenance
 
@@ -27,6 +27,7 @@
 - terminal settings ([da55404](https://github.com/gjrtimmer/traefik-certmanager/commit/da55404b3d04b277c3cbb6e07547b295bea39214))
 - update project settings ([5cbc864](https://github.com/gjrtimmer/traefik-certmanager/commit/5cbc8642d10fd4bea1d954ae9fa8903a454c0d9e))
 - fix vscode terminal ([7e602e6](https://github.com/gjrtimmer/traefik-certmanager/commit/7e602e65d088e5d49f924b3f3ded90bfa0343af1))
+- git\-conventional\-commits ([6a3ee5c](https://github.com/gjrtimmer/traefik-certmanager/commit/6a3ee5c1ccf781577e711efdba8fdf36a67da9d3))
 
 ### Features
 
@@ -103,6 +104,8 @@
 - fix bumpver current version ([6242d3b](https://github.com/gjrtimmer/traefik-certmanager/commit/6242d3beb8247723cfefc7921f160fe029d72481))
 - fix bumpver files ([ddb59ba](https://github.com/gjrtimmer/traefik-certmanager/commit/ddb59ba0b740069f701510477698c597d8e0a090))
 - add chart\-release ([b6a71d1](https://github.com/gjrtimmer/traefik-certmanager/commit/b6a71d1e2c4cb952629dbb7be67ad85d2793d96c))
+- fix release info ([1ef2bf7](https://github.com/gjrtimmer/traefik-certmanager/commit/1ef2bf7f7ab62bb7404e64a6ffab866a0e07995a))
+- update chart releaser ([64723e3](https://github.com/gjrtimmer/traefik-certmanager/commit/64723e30d48a33bd701440220485e8cbf0555eb4))
 
 ### refactor
 
