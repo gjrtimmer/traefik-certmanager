@@ -21,5 +21,6 @@ push = false
     '__version__ = "{version}"',
 ]
 "charts/traefik-certmanager/Chart.yaml" = [
+    'version: {version}',
     'appVersion: "{version}"',
 ]
