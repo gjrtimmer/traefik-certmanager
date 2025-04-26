@@ -15,7 +15,7 @@ The default values assume you have cert-manager installed, see also [cert-manage
 > ```shell
 > helmfile --file ./manifests/cert-manager/helmfile.yaml apply
 > ```
-
+>
 > **helm**
 >
 > ```shell
@@ -37,7 +37,7 @@ As well as Traefik, see also [traefik installation](https://doc.traefik.io/traef
 > ```shell
 > helmfile --file ./manifests/traefik/helmfile.yaml apply
 > ```
-
+>
 > **helmfile**
 >
 > ```shell
