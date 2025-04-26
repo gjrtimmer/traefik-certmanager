@@ -1,1 +1,11 @@
+# Theme
 theme: jekyll-theme-cayman
+
+# Display breadcrumbs at all?
+breadcrumb_display: true
+
+# Display Home path in breadcrumb?
+breadcrumb_home_display: true
+
+# Display name for "Home" path
+breadcrumb_home_name: Home
