@@ -7,4 +7,3 @@ make-release-latest: true
 git-base-url: https://api.github.com/
 git-upload-url: https://uploads.github.com/
 release-notes-file: RELEASE.md
-release-name-template: "{{ .Version }}"
