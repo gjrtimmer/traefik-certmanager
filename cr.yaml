@@ -1,0 +1,10 @@
+owner: gjrtimmer
+git-repo: traefik-certmanager
+package-path: docs
+packages-with-index: false
+pages-branch: main
+pages-index-path: docs/index.yaml
+index-path: docs/index.yaml
+make-release-latest: true
+git-base-url: https://api.github.com/
+git-upload-url: https://uploads.github.com/
