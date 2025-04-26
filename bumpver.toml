@@ -17,4 +17,6 @@ push = false
 "bumpver.toml" = [
     'current_version = "{version}"',
 ]
-
+"main.py" = [
+    '__version__ = "{version}"',
+]
