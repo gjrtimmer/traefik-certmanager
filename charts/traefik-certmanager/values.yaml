@@ -13,9 +13,10 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+# Add additional labels to the deployment
 labels:
-  - timmertech.io/managed-by/vcs: github
-  - timmertech.io/managed-by/repository: gjrtimmer/traefik-certmanager
+  # timmertech.io/managed-by/vcs: github
+  # timmertech.io/managed-by/repository: gjrtimmer/traefik-certmanager
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
