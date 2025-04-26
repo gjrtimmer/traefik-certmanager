@@ -206,6 +206,8 @@ def watch_crd(group, version, plural):
     resource_version = ""
     logging.info("Watching %s/%s/%s", group, version, plural)
 
+    retry_delay = 1  # initial retry delay
+
     while not STOP_EVENT.is_set():
         try:
             w = watch.Watch()
@@ -248,19 +250,24 @@ def watch_crd(group, version, plural):
                 else:
                     logging.info("%s/%s: unknown event type: %s", name, ns, t)
                     logging.debug(json.dumps(obj, indent=2))
+
+            retry_delay = 1  # reset delay after successful stream
+
         except ApiException as e:
             if e.status == 410:
                 logging.warning(
                     "Resource version expired (410), resetting to latest..."
                 )
                 resource_version = ""
-                time.sleep(1)
             else:
                 logging.warning("ApiException when watching: %s", e)
-                time.sleep(5)
+            time.sleep(retry_delay)
+            retry_delay = min(retry_delay * 2, 60)  # exponential backoff up to 60s
+
         except Exception as e:  # pylint: disable=broad-exception-caught
             logging.warning("Unexpected exception during watch: %s", e)
-            time.sleep(5)
+            time.sleep(retry_delay)
+            retry_delay = min(retry_delay * 2, 60)  # exponential backoff up to 60s
 
     logging.info("Watcher for %s/%s/%s exiting", group, version, plural)
 
