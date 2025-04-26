@@ -6,6 +6,7 @@ import re
 import signal
 import sys
 import threading
+import time
 import uuid
 from functools import partial
 
@@ -64,6 +65,7 @@ USE_LOCAL_CONFIG = False  # set in main()
 
 
 def get_candidate_id():
+    """Generate a unique candidate ID for leader election."""
     # 1) Use the K8s‐injected POD_NAME if present
     pod = os.getenv("POD_NAME")
     if pod:
@@ -203,10 +205,10 @@ def watch_crd(group, version, plural):
     crds = client.CustomObjectsApi()
     resource_version = ""
     logging.info("Watching %s/%s/%s", group, version, plural)
-    w = watch.Watch()
 
     while not STOP_EVENT.is_set():
         try:
+            w = watch.Watch()
             stream = w.stream(
                 crds.list_cluster_custom_object,
                 group=group,
@@ -246,8 +248,19 @@ def watch_crd(group, version, plural):
                 else:
                     logging.info("%s/%s: unknown event type: %s", name, ns, t)
                     logging.debug(json.dumps(obj, indent=2))
+        except ApiException as e:
+            if e.status == 410:
+                logging.warning(
+                    "Resource version expired (410), resetting to latest..."
+                )
+                resource_version = ""
+                time.sleep(1)
+            else:
+                logging.warning("ApiException when watching: %s", e)
+                time.sleep(5)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logging.warning("Stream failed: %s", e)
+            logging.warning("Unexpected exception during watch: %s", e)
+            time.sleep(5)
 
     logging.info("Watcher for %s/%s/%s exiting", group, version, plural)
 
