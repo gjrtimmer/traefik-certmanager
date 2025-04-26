@@ -7,6 +7,10 @@ permalink: index.html
 
 The Traefik CertManager manages the handling of certificates of Traefik IngressRoutes.
 
+[Cert Manager](https://cert-manager.io) handles only default Kubernetes `Ingress` kind.
+This manager provides the management so that the [Cert Manager](https://cert-manager.io)
+can provide certicates for the Traefik `IngressRoute` kind.
+
 ### Prerequisites
 
 The following prerequisites must be met before the Traefik CertManager can be used.

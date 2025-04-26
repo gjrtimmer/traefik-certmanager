@@ -11,6 +11,8 @@ this repository is a fork of the original traefik-certmanager which was created 
 This manager provides the management so that the [Cert Manager](https://cert-manager.io)
 can provide certicates for the Traefik `IngressRoute` kind.
 
+See documentation @ [gjrtimmer.github.io/traefik-certmanager](https://gjrtimmer.github.io/traefik-certmanager)
+
 ## Prerequisites
 
 The following prerequisites must be met before the Traefik CertManager can be used.
