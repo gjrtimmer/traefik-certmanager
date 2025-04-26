@@ -25,10 +25,10 @@ jobs:
         id: release_info
         shell: bash
         run: |
-          # use the tag name directly (e.g. "1.2.3")
+          # extract the version from the tag
           version="${GITHUB_REF#refs/tags/}"
-
-          # extract the first section under the top-level "## " heading
+      
+          # extract changelog section
           in_section=false
           changelog=""
           while IFS= read -r line; do
@@ -43,17 +43,12 @@ jobs:
               changelog+="${line}\n"
             fi
           done < CHANGELOG.md
-
-          # escape newlines for GitHub output
-          text="${changelog}"
-          text="${text//'%'/'%25'}"
-          text="${text//$'\n'/'%0A'}"
-          text="${text//$'\r'/'%0D'}"
-          
-          {
-            echo "version=$version"
-            echo "body=$text"
-          } >> "$GITHUB_OUTPUT"
+      
+          # write the real unescaped changelog to file
+          printf "%b" "$changelog" > RELEASE.md
+      
+          # only output the version (no need for changelog anymore)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
@@ -62,7 +57,7 @@ jobs:
         with:
           tag_name:     ${{ github.ref_name }}
           release_name: ${{ steps.release_info.outputs.version }}
-          body:         ${{ steps.release_info.outputs.body }}
+          body_path:    RELEASE.md
           draft:        false
           prerelease:   false
 
