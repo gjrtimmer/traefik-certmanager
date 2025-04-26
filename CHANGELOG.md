@@ -1,4 +1,4 @@
-## **2.0.0-rc8**&emsp;<sub><sup>2025-04-26 ([47d581a...6a8b46f](https://github.com/gjrtimmer/traefik-certmanager/compare/47d581a6ac1d44de991097a67e4d00de74985b74...6a8b46fa49ed043d9eac769ad5081368c6cdae72?diff=split))</sup></sub>
+## **2.0.0**&emsp;<sub><sup>2025-04-26 ([47d581a...77b6aad](https://github.com/gjrtimmer/traefik-certmanager/compare/47d581a6ac1d44de991097a67e4d00de74985b74...77b6aad65b8942307cdcc4b2bd5762a01e6ac4fe?diff=split))</sup></sub>
 
 ### Maintenance
 
@@ -109,6 +109,8 @@
 - fix charts location ([95c7102](https://github.com/gjrtimmer/traefik-certmanager/commit/95c71028db02719ff69e14a7700150f5c6764b44))
 - fix release info ([e2f3518](https://github.com/gjrtimmer/traefik-certmanager/commit/e2f351893b47993085e6bcea37d7e95745184f0b))
 - add release info to chart artifact ([6a8b46f](https://github.com/gjrtimmer/traefik-certmanager/commit/6a8b46fa49ed043d9eac769ad5081368c6cdae72))
+- remove chart index ([23ddb15](https://github.com/gjrtimmer/traefik-certmanager/commit/23ddb158f3cf51216ef8ab6542ba09ce3848fa4e))
+- enforce image version to update chart ([77b6aad](https://github.com/gjrtimmer/traefik-certmanager/commit/77b6aad65b8942307cdcc4b2bd5762a01e6ac4fe))
 
 ### refactor
 
