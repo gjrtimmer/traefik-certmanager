@@ -1,7 +1,6 @@
 owner: gjrtimmer
 git-repo: traefik-certmanager
 package-path: docs
-packages-with-index: false
 pages-branch: main
 pages-index-path: docs/index.yaml
 index-path: docs/index.yaml
