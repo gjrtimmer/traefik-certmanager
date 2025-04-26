@@ -1,6 +1,6 @@
 # code: language=yaml
 ---
-name: linter
+name: Lint Code
 
 on:
   push:
