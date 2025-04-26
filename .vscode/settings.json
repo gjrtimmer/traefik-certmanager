@@ -1,4 +1,6 @@
 {
     "editor.formatOnSave": true,
     "markdown.extension.toc.levels": "2..6",
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.enablePersistentSessions": false
 }
