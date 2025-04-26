@@ -24,3 +24,6 @@ push = false
     'version: {version}',
     'appVersion: "{version}"',
 ]
+"charts/traefik-certmanager/templates/deployment.yaml" = [
+    'image: "{{ .Values.image.repository }}:{version}"',
+]
