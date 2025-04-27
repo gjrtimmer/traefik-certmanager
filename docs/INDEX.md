@@ -31,5 +31,5 @@ helm repo update
 Install Traefik CertManager
 
 ```shell
-helm install traefik-certmanager traefik-certmanager --namespace traefik
+helm install traefik-certmanager traefik-certmanager/traefik-certmanager -n traefik
 ```
