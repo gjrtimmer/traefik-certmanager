@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   traefik-certmanager:
   - apiVersion: v2
+    appVersion: 2.1.0
+    created: "2025-04-27T15:58:59.391547636Z"
+    description: Traefik CertManager provides cert-manager support for Traefik IngressRoute
+    digest: f08fe889bc117941f219dd1139ac37215fc2d30e75f64315240f333fe14b0319
+    name: traefik-certmanager
+    type: application
+    urls:
+    - https://github.com/gjrtimmer/traefik-certmanager/releases/download/2.1.0/traefik-certmanager-2.1.0.tgz
+    version: 2.1.0
+  - apiVersion: v2
     appVersion: 2.0.0
     created: "2025-04-27T00:42:05.273375103Z"
     description: Traefik CertManager provides cert-manager support for Traefik IngressRoute
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/gjrtimmer/traefik-certmanager/releases/download/2.0.0/traefik-certmanager-2.0.0.tgz
     version: 2.0.0
-generated: "2025-04-27T00:42:05.273385652Z"
+generated: "2025-04-27T15:58:59.391556372Z"
