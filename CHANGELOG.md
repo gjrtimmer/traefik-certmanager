@@ -1,3 +1,15 @@
+## **2.1.0**&emsp;<sub><sup>2025-04-27 ([4c6a62b...f273775](https://github.com/gjrtimmer/traefik-certmanager/compare/4c6a62bf814285cda6d3155be81825553965aa6e...f273775d85c217bb7fbbb18e2e893388edbc894f?diff=split))</sup></sub>
+
+### Bug Fixes
+
+- skipping if secretName is present ([f273775](https://github.com/gjrtimmer/traefik-certmanager/commit/f273775d85c217bb7fbbb18e2e893388edbc894f))
+
+### Operations
+
+- update release ([0b33d24](https://github.com/gjrtimmer/traefik-certmanager/commit/0b33d24f4b67edc39e16862c6f2958bb7cdf4c96))
+
+<br>
+
 ## **2.0.0**&emsp;<sub><sup>2025-04-26 ([47d581a...77b6aad](https://github.com/gjrtimmer/traefik-certmanager/compare/47d581a6ac1d44de991097a67e4d00de74985b74...77b6aad65b8942307cdcc4b2bd5762a01e6ac4fe?diff=split))</sup></sub>
 
 ### Maintenance
