@@ -106,8 +106,7 @@ def reconcile_certificate(crds, namespace, name, secretname, routes, annotations
         )
         secretname = name
     else:
-        logging.info("%s/%s: no secretName, skipping", namespace, name)
-        return
+        logging.info("%s/%s: using existing secretName %s", namespace, name, secretname)
 
     # Resolve desired issuerRef
     if "cert-manager.io/cluster-issuer" in annotations:
