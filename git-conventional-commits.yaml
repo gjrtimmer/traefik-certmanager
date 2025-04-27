@@ -14,6 +14,7 @@ convention:
   - merge
   - revert
   - release
+  - chart
   commitScopes: []
   releaseTagGlobPattern: "[0-9]*.[0-9]*.[0-9]*"
 changelog:

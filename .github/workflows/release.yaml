@@ -56,21 +56,36 @@ jobs:
           # Copy Release Info for Chart Release Info
           cp RELEASE.md charts/traefik-certmanager/RELEASE.md
 
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name:     ${{ github.ref_name }}
-          release_name: ${{ steps.release_info.outputs.version }}
-          body_path:    RELEASE.md
-          draft:        false
-          prerelease:   false
+      # - name: Create GitHub Release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name:     ${{ github.ref_name }}
+      #     release_name: ${{ steps.release_info.outputs.version }}
+      #     body_path:    RELEASE.md
+      #     draft:        false
+      #     prerelease:   false
 
       - name: Configure Git
         run: |
           git config user.name "G.J.R. Timmer"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Delete Tag for Chart Release
+        run: |
+          git push --delete origin tagname
+          git tag --delete tagname
+
+      - name: Override Chart Releaser Commit Message
+        run: |
+          mkdir -p .git/hooks
+          cat > .git/hooks/commit-msg <<-EOF
+            #!/bin/bash
+            # Overwrite commit message with release and injected version
+            echo "chart: ${{ steps.release_info.outputs.version }}" > "\$1"
+          EOF
+          chmod +x .git/hooks/commit-msg
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
