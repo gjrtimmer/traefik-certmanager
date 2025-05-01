@@ -98,21 +98,31 @@ def safe_get(obj, keys, default=None):
     return v
 
 
-def reconcile_certificate(crds, namespace, name, secretname, routes, annotations, event):
+def reconcile_certificate(
+    crds, namespace, name, secretname, routes, annotations, event
+):
     """Create or patch Certificate when annotations or hosts change."""
     # Handle missing secretName on tls spec
     # this means we only patch if the secretName is not set
     # while the tls exists in the `spec`, meaning that we are
     # requesting a certificate
     if not secretname and PATCH_SECRETNAME:
-        logging.info("%s/%s: patching: no secretName [event=%s]", namespace, name, event)
+        logging.info(
+            "%s/%s: patching: no secretName [event=%s]", namespace, name, event
+        )
         patch = {"spec": {"tls": {"secretName": name}}}
         crds.patch_namespaced_custom_object(
             CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, name, patch
         )
         secretname = name
     else:
-        logging.info("%s/%s: using existing [secretName=%s event=%s]", namespace, name, secretname, event)
+        logging.info(
+            "%s/%s: using existing [secretName=%s event=%s]",
+            namespace,
+            name,
+            secretname,
+            event,
+        )
 
     # Resolve desired issuerRef
     if "cert-manager.io/cluster-issuer" in annotations:
@@ -188,7 +198,9 @@ def reconcile_certificate(crds, namespace, name, secretname, routes, annotations
 def delete_certificate(crds, namespace, secretname, event):
     """Delete a cert-manager Certificate if cleanup is enabled."""
     if CERT_CLEANUP:
-        logging.info("Received remove request [certificate=%s event=%s]", secretname, event)
+        logging.info(
+            "Received remove request [certificate=%s event=%s]", secretname, event
+        )
         try:
             crds.delete_namespaced_custom_object(
                 CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname
@@ -241,15 +253,28 @@ def watch_crd(group, version, plural):
 
                 # Skip or filter
                 if annotations.get("cert-manager.io/ignore", "").lower() == "true":
-                    logging.info("Skipping %s/%s [reason=annotation-ignore event=%s]", ns, name, evn)
+                    logging.info(
+                        "Skipping %s/%s [reason=annotation-ignore event=%s]",
+                        ns,
+                        name,
+                        evn,
+                    )
                     continue
 
                 if FILTER_SET and cls not in FILTER_SET:
-                    logging.info("Skipping %s/%s [reason=not-in-filter ingress.class=%s event=%s]", ns, name, cls, evn)
+                    logging.info(
+                        "Skipping %s/%s [reason=not-in-filter ingress.class=%s event=%s]",
+                        ns,
+                        name,
+                        cls,
+                        evn,
+                    )
                     continue
 
                 if not tls:
-                    logging.info("Skipping %s/%s [reason=no-tls event=%s]", ns, name, evn)
+                    logging.info(
+                        "Skipping %s/%s [reason=no-tls event=%s]", ns, name, evn
+                    )
                     continue
 
                 if evn in ("ADDED", "MODIFIED"):
@@ -308,7 +333,9 @@ def on_stopped_leading():
 
 def exit_gracefully(signum, frame):  # pylint: disable=unused-argument
     """Handle termination signals and exit cleanly."""
-    logging.info("Signal received, shutting down [signal=%s]", signal.Signals(signum).name)
+    logging.info(
+        "Signal received, shutting down [signal=%s]", signal.Signals(signum).name
+    )
     STOP_EVENT.set()
     sys.exit(0)
 
