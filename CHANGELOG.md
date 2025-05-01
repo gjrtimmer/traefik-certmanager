@@ -1,3 +1,13 @@
+## **2.2.1**&emsp;<sub><sup>2025-05-01 ([89403c2...dbd93c0](https://github.com/gjrtimmer/traefik-certmanager/compare/89403c24178396a3e49a8d48ee1709a7bf47c5e9...dbd93c0227c8d2159fed14266978de506656724f?diff=split))</sup></sub>
+
+### Bug Fixes
+
+##### &ensp;`logging`
+
+- remove redundant logging ([dbd93c0](https://github.com/gjrtimmer/traefik-certmanager/commit/dbd93c0227c8d2159fed14266978de506656724f))
+
+<br>
+
 ## **2.2.0**&emsp;<sub><sup>2025-05-01 ([0b825ec...7f3afe8](https://github.com/gjrtimmer/traefik-certmanager/compare/0b825ec402a8f6979160e87ec0967b2f0a93f5bd...7f3afe8b856077560a36291c9d8b323ee540464f?diff=split))</sup></sub>
 
 ### Maintenance

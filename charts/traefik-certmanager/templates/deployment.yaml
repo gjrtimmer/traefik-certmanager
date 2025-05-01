@@ -32,7 +32,7 @@ spec:
       serviceAccountName: {{ include "traefik-certmanager.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:2.2.0"
+          image: "{{ .Values.image.repository }}:2.2.1"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: INGRESS_CLASS_FILTER
