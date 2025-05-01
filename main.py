@@ -92,11 +92,6 @@ def safe_get(obj, keys, default=None):
 
 def reconcile_certificate(crds, namespace, name, secretname, routes, annotations):
     """Create or patch Certificate when annotations or hosts change."""
-    # Skip if ignore annotation set
-    if annotations.get("cert-manager.io/ignore", "").lower() == "true":
-        logging.info("Ignoring %s/%s (ignore=true)", namespace, secretname)
-        return
-
     # Handle missing secretName
     if not secretname and PATCH_SECRETNAME:
         logging.info("%s/%s: no secretName, patching", namespace, name)
