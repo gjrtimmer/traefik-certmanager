@@ -229,6 +229,7 @@ def watch_crd(group, version, plural):
                 name = safe_get(obj, "metadata.name")
                 annotations = obj.get("metadata", {}).get("annotations", {})
                 cls = annotations.get("kubernetes.io/ingress.class", "")
+                tls = safe_get(obj, "spec.tls")
                 secretname = safe_get(obj, "spec.tls.secretName")
                 routes = safe_get(obj, "spec.routes")
 
@@ -236,9 +237,16 @@ def watch_crd(group, version, plural):
                 if annotations.get("cert-manager.io/ignore", "").lower() == "true":
                     logging.info("Ignoring %s/%s", ns, name)
                     continue
+                
                 if FILTER_SET and cls not in FILTER_SET:
                     logging.info("Skipping %s/%s ingress.class=%s", ns, name, cls)
                     continue
+
+                if not tls and not PATCH_SECRETNAME:
+                    logging.info("Skipping %s/%s (no TLS)", ns, name)
+                    continue
+                elif not tls and PATCH_SECRETNAME:
+                    logging.info("%s/%s: no TLS block, but PATCH_SECRETNAME=true; forcing default TLS", ns, name)
 
                 if t in ("ADDED", "MODIFIED"):
                     reconcile_certificate(
