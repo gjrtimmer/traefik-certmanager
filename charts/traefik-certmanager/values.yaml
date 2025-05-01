@@ -72,8 +72,6 @@ options:
     default:
       name: letsencrypt
       kind: ClusterIssuer
-  issuerNameDefault: letsencrypt
-  ISSUER_KIND_DEFAULT: ClusterIssuer
   certCleanup: "false"
   patchSecretName: "false"
   supportLegacyCRDs: "false"
