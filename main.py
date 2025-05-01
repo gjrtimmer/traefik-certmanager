@@ -98,21 +98,21 @@ def safe_get(obj, keys, default=None):
     return v
 
 
-def reconcile_certificate(crds, namespace, name, secretname, routes, annotations):
+def reconcile_certificate(crds, namespace, name, secretname, routes, annotations, event):
     """Create or patch Certificate when annotations or hosts change."""
     # Handle missing secretName on tls spec
     # this means we only patch if the secretName is not set
     # while the tls exists in the `spec`, meaning that we are
     # requesting a certificate
     if not secretname and PATCH_SECRETNAME:
-        logging.info("%s/%s: no secretName, patching", namespace, name)
+        logging.info("%s/%s: patching: no secretName [event=%s]", namespace, name, event)
         patch = {"spec": {"tls": {"secretName": name}}}
         crds.patch_namespaced_custom_object(
             CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, name, patch
         )
         secretname = name
     else:
-        logging.info("%s/%s: using existing secretName %s", namespace, name, secretname)
+        logging.info("%s/%s: using existing [secretName=%s event=%s]", namespace, name, secretname, event)
 
     # Resolve desired issuerRef
     if "cert-manager.io/cluster-issuer" in annotations:
@@ -185,15 +185,15 @@ def reconcile_certificate(crds, namespace, name, secretname, routes, annotations
         logging.info("Requested Certificate %s for hosts %s", secretname, desired_hosts)
 
 
-def delete_certificate(crds, namespace, secretname):
+def delete_certificate(crds, namespace, secretname, event):
     """Delete a cert-manager Certificate if cleanup is enabled."""
     if CERT_CLEANUP:
-        logging.info("Removing Certificate %s", secretname)
+        logging.info("Received remove request [certificate=%s event=%s]", secretname, event)
         try:
             crds.delete_namespaced_custom_object(
                 CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname
             )
-            logging.info("Deleted Certificate %s", secretname)
+            logging.info("Deleted [certificate=%s event=%s]", secretname, event)
         except ApiException as e:
             logging.exception(
                 "Exception when calling CustomObjectsApi->delete_namespaced_custom_object: %s",
@@ -225,7 +225,7 @@ def watch_crd(group, version, plural):
                 timeout_seconds=10,
             )
             for event in stream:
-                t = event["type"]
+                evn = event["type"].upper()
                 obj = event["object"]
 
                 resource_version = safe_get(
@@ -241,25 +241,25 @@ def watch_crd(group, version, plural):
 
                 # Skip or filter
                 if annotations.get("cert-manager.io/ignore", "").lower() == "true":
-                    logging.info("Ignoring %s/%s", ns, name)
+                    logging.info("Skipping %s/%s [reason=annotation-ignore event=%s]", ns, name, evn)
                     continue
 
                 if FILTER_SET and cls not in FILTER_SET:
-                    logging.info("Skipping %s/%s ingress.class=%s", ns, name, cls)
+                    logging.info("Skipping %s/%s [reason=not-in-filter ingress.class=%s event=%s]", ns, name, cls, evn)
                     continue
 
                 if not tls:
-                    logging.info("Skipping %s/%s (no TLS)", ns, name)
+                    logging.info("Skipping %s/%s [reason=no-tls event=%s]", ns, name, evn)
                     continue
 
-                if t in ("ADDED", "MODIFIED"):
+                if evn in ("ADDED", "MODIFIED"):
                     reconcile_certificate(
-                        crds, ns, name, secretname, routes, annotations
+                        crds, ns, name, secretname, routes, annotations, evn
                     )
-                elif t == "DELETED":
-                    delete_certificate(crds, ns, name)
+                elif evn == "DELETED":
+                    delete_certificate(crds, ns, name, evn)
                 else:
-                    logging.info("%s/%s: unknown event type: %s", name, ns, t)
+                    logging.info("%s/%s: unknown event type: %s", name, ns, evn)
                     logging.debug(json.dumps(obj, indent=2))
 
             retry_delay = 1  # reset delay after successful stream
