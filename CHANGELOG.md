@@ -1,3 +1,29 @@
+## **2.2.2**&emsp;<sub><sup>2025-05-01 ([9aafbda...9a64488](https://github.com/gjrtimmer/traefik-certmanager/compare/9aafbdabbc3def401568854e592e0799bc01b10f...9a64488768c71390961f960bf329ee5646a8f75b?diff=split))</sup></sub>
+
+### Maintenance
+
+##### &ensp;`lint`
+
+- format ([9a64488](https://github.com/gjrtimmer/traefik-certmanager/commit/9a64488768c71390961f960bf329ee5646a8f75b))
+
+### Features
+
+##### &ensp;`logging`
+
+- add event ([5b4baaa](https://github.com/gjrtimmer/traefik-certmanager/commit/5b4baaae5037740396c042d00744a67fc9edf66d))
+
+### Bug Fixes
+
+##### &ensp;`chart`
+
+- remove incorrect options ([c684c14](https://github.com/gjrtimmer/traefik-certmanager/commit/c684c144ba7782a3fd39500ee237885c61fc4e4f))
+
+##### &ensp;`logging`
+
+- update ([865e814](https://github.com/gjrtimmer/traefik-certmanager/commit/865e81492db5674e0f515c23741c80dbfc017586))
+
+<br>
+
 ## **2.2.1**&emsp;<sub><sup>2025-05-01 ([89403c2...dbd93c0](https://github.com/gjrtimmer/traefik-certmanager/compare/89403c24178396a3e49a8d48ee1709a7bf47c5e9...dbd93c0227c8d2159fed14266978de506656724f?diff=split))</sup></sub>
 
 ### Bug Fixes
