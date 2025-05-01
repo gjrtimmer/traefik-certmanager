@@ -308,7 +308,7 @@ def on_stopped_leading():
 
 def exit_gracefully(signum, frame):  # pylint: disable=unused-argument
     """Handle termination signals and exit cleanly."""
-    logging.info("Signal %s received, shutting down", signal.Signals(signum).name)
+    logging.info("Signal received, shutting down [signal=%s]", signal.Signals(signum).name)
     STOP_EVENT.set()
     sys.exit(0)
 
@@ -326,12 +326,14 @@ def main():
     else:
         config.load_incluster_config()
 
-    logging.info("Starting traefik-cert-manager")
-    logging.info("Using cert-manager: %s/%s/%s", CERT_GROUP, CERT_VERSION, CERT_PLURAL)
-    logging.info("Fallback issuer=%s/%s", ISSUER_KIND_DEFAULT, ISSUER_NAME_DEFAULT)
-    logging.info("Cleanup enabled=%s", CERT_CLEANUP)
-    logging.info("Patch secretName=%s", PATCH_SECRETNAME)
-    logging.info("Legacy CRDs Support=%s", SUPPORT_LEGACY_CRDS)
+    logging.info("Starting traefik-cert-manager [version=%s]", __version__)
+    logging.info("cert-manager: %s/%s/%s", CERT_GROUP, CERT_VERSION, CERT_PLURAL)
+    logging.info("options.ingressClassFilter=%s", INGRESS_CLASS_FILTER)
+    logging.info("options.issuer.default.name=%s", ISSUER_NAME_DEFAULT)
+    logging.info("options.issuer.default.kind=%s", ISSUER_KIND_DEFAULT)
+    logging.info("options.certCleanup=%s", CERT_CLEANUP)
+    logging.info("options.patchSecretName=%s", PATCH_SECRETNAME)
+    logging.info("options.supportLegacyCRDs=%s", SUPPORT_LEGACY_CRDS)
 
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
@@ -354,12 +356,12 @@ def main():
     try:
         leaderelection.LeaderElection(le_cfg).run()
     except KeyboardInterrupt:
-        logging.info("Interrupted, shutting down")
+        logging.info("Shutting down [SIGINT]")
         STOP_EVENT.set()
 
     # Wait for watcher threads to exit
     STOP_EVENT.wait()
-    logging.info("Shutdown complete")
+    logging.info("Shutdown completed")
 
 
 if __name__ == "__main__":
