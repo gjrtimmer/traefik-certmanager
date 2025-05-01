@@ -92,7 +92,10 @@ def safe_get(obj, keys, default=None):
 
 def reconcile_certificate(crds, namespace, name, secretname, routes, annotations):
     """Create or patch Certificate when annotations or hosts change."""
-    # Handle missing secretName
+    # Handle missing secretName on tls spec
+    # this means we only patch if the secretName is not set
+    # while the tls exists in the `spec`, meaning that we are
+    # requesting a certificate
     if not secretname and PATCH_SECRETNAME:
         logging.info("%s/%s: no secretName, patching", namespace, name)
         patch = {"spec": {"tls": {"secretName": name}}}
