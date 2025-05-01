@@ -21,8 +21,14 @@ __version__ = "2.2.0"
 
 class LeaseFilter(logging.Filter):
     def filter(self, record):
-        # only drop the library’s own lease‑acquire log
         msg = record.getMessage()
+
+        # only drop the library’s own lease‑acquire log
+        if msg.startswith("leader ") and msg.endswith(
+            "has successfully acquired lease"
+        ):
+            return False
+
         # drop “yet to finish lease_duration, lease held by <anything> and has not expired”
         if re.match(
             r"^yet to finish lease_duration, lease held by .+ and has not expired$", msg
