@@ -24,7 +24,9 @@ class LeaseFilter(logging.Filter):
         # only drop the library’s own lease‑acquire log
         msg = record.getMessage()
         # drop “yet to finish lease_duration, lease held by <anything> and has not expired”
-        if re.match(r"^yet to finish lease_duration, lease held by .+ and has not expired$", msg):
+        if re.match(
+            r"^yet to finish lease_duration, lease held by .+ and has not expired$", msg
+        ):
             return False
 
         return True
@@ -235,7 +237,7 @@ def watch_crd(group, version, plural):
                 if annotations.get("cert-manager.io/ignore", "").lower() == "true":
                     logging.info("Ignoring %s/%s", ns, name)
                     continue
-                
+
                 if FILTER_SET and cls not in FILTER_SET:
                     logging.info("Skipping %s/%s ingress.class=%s", ns, name, cls)
                     continue
