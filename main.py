@@ -237,11 +237,9 @@ def watch_crd(group, version, plural):
                     logging.info("Skipping %s/%s ingress.class=%s", ns, name, cls)
                     continue
 
-                if not tls and not PATCH_SECRETNAME:
+                if not tls:
                     logging.info("Skipping %s/%s (no TLS)", ns, name)
                     continue
-                elif not tls and PATCH_SECRETNAME:
-                    logging.info("%s/%s: no TLS block, but PATCH_SECRETNAME=true; forcing default TLS", ns, name)
 
                 if t in ("ADDED", "MODIFIED"):
                     reconcile_certificate(
