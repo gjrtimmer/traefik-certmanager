@@ -2,7 +2,7 @@
 
 > [!NOTE]
 >
-> Current Release: 2.1.0
+> Current Release: 2.2.0
 
 The Traefik CertManager manages the handling of certificates of Traefik IngressRoutes,
 this repository is a fork of the original traefik-certmanager which was created by [Rob Kooper](https://github.com/robkooper).

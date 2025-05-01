@@ -1,3 +1,25 @@
+## **2.2.0**&emsp;<sub><sup>2025-05-01 ([0b825ec...7f3afe8](https://github.com/gjrtimmer/traefik-certmanager/compare/0b825ec402a8f6979160e87ec0967b2f0a93f5bd...7f3afe8b856077560a36291c9d8b323ee540464f?diff=split))</sup></sub>
+
+### Maintenance
+
+- comments ([7200648](https://github.com/gjrtimmer/traefik-certmanager/commit/720064867b1e802394681db96010af27ebc722c2))
+
+##### &ensp;`lint`
+
+- format ([7f3afe8](https://github.com/gjrtimmer/traefik-certmanager/commit/7f3afe8b856077560a36291c9d8b323ee540464f))
+
+### Bug Fixes
+
+- skip non tls certs ([a477803](https://github.com/gjrtimmer/traefik-certmanager/commit/a4778034b62d34d63aa6e0dc27c91572b96da3ed))
+- remove redundant code ([4f51281](https://github.com/gjrtimmer/traefik-certmanager/commit/4f51281e0b45b34b46be0e794c1d18d81b62bc23))
+- skip route if not tls block ([1e114ba](https://github.com/gjrtimmer/traefik-certmanager/commit/1e114baba20725414f9721b97cf059cc05430675))
+
+##### &ensp;`logging`
+
+- suppress "yet the finish lease lease\_duration" ([bf1134d](https://github.com/gjrtimmer/traefik-certmanager/commit/bf1134d62d71407cfed5061c686bae3e51330906))
+
+<br>
+
 ## **2.1.0**&emsp;<sub><sup>2025-04-27 ([4c6a62b...f273775](https://github.com/gjrtimmer/traefik-certmanager/compare/4c6a62bf814285cda6d3155be81825553965aa6e...f273775d85c217bb7fbbb18e2e893388edbc894f?diff=split))</sup></sub>
 
 ### Bug Fixes
