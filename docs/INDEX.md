@@ -11,7 +11,7 @@ The Traefik CertManager manages the handling of certificates of Traefik IngressR
 This manager provides the management so that the [Cert Manager](https://cert-manager.io)
 can provide certicates for the Traefik `IngressRoute` kind.
 
-> **Current Version: 2.3.1**
+> **Current Version: 2.3.2**
 
 ### Prerequisites
 
@@ -49,7 +49,7 @@ releases:
 - name: traefik-certmanager
   namespace: traefik
   chart: traefik-certmanager/traefik-certmanager
-  version: 2.3.1
+  version: 2.3.2
   installed: true
   values:
     - values.yaml

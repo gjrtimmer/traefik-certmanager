@@ -1,3 +1,13 @@
+## **2.3.2**&emsp;<sub><sup>2026-07-30 ([062f576...188ce5c](https://github.com/gjrtimmer/traefik-certmanager/compare/062f57692f26626d01ae41c367954372f78e92a8...188ce5c2bbdf652c1590a74b8aeb7b6f2a750b98?diff=split))</sup></sub>
+
+### Bug Fixes
+
+##### &ensp;`chart`
+
+- grant patch verb on cert\-manager certificates ([188ce5c](https://github.com/gjrtimmer/traefik-certmanager/commit/188ce5c2bbdf652c1590a74b8aeb7b6f2a750b98))
+
+<br>
+
 ## **2.3.1**&emsp;<sub><sup>2026-07-30 ([fcc6a28...3ff6019](https://github.com/gjrtimmer/traefik-certmanager/compare/fcc6a28be95a79763bbe3b5a6283eff06ae2b2a5...3ff6019b84ee90de5af0bf0f2309e9fe022ad391?diff=split))</sup></sub>
 
 ### Operations
