@@ -154,37 +154,27 @@ def reconcile_certificate(
         "dnsNames": desired_hosts,
     }
 
+    # Only the lookup is guarded, and only a genuine 404 means "create it". Previously the try
+    # wrapped the patch as well, so a failed patch fell into the create branch and died with
+    # 409 AlreadyExists — leaving the old certificate in place, with the real patch error
+    # swallowed and nothing in the log to explain it.
     try:
-        # Fetch existing
         cert = crds.get_namespaced_custom_object(
             CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname
         )
-        existing = cert.get("spec", {})
-        existing_ref = existing.get("issuerRef", {})
-        existing_hosts = existing.get("dnsNames", [])
-        # Compare
-        if (
-            existing_ref.get("kind") != desired_kind
-            or existing_ref.get("name") != desired_name
-            or set(existing_hosts) != set(desired_hosts)
-        ):
-            # Patch
-            patch_body = {"spec": desired_spec}
-            crds.patch_namespaced_custom_object(
-                CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname, patch_body
-            )
-            logging.info(
-                "Patched Certificate %s (issuerRef %s→%s/%s hosts %s→%s)",
+    except ApiException as e:
+        if e.status != 404:
+            logging.error(
+                "Failed to read Certificate %s/%s: %s %s",
+                namespace,
                 secretname,
-                existing_ref,
-                desired_kind,
-                desired_name,
-                existing_hosts,
-                desired_hosts,
+                e.status,
+                e.reason,
             )
-        else:
-            logging.info("No update required for Certificate %s", secretname)
-    except ApiException:
+            return
+        cert = None
+
+    if cert is None:
         # Create new
         body = {
             "apiVersion": f"{CERT_GROUP}/{CERT_VERSION}",
@@ -192,10 +182,57 @@ def reconcile_certificate(
             "metadata": {"name": secretname},
             "spec": {"secretName": secretname, **desired_spec},
         }
-        crds.create_namespaced_custom_object(
-            CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, body
-        )
+        try:
+            crds.create_namespaced_custom_object(
+                CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, body
+            )
+        except ApiException as e:
+            logging.error(
+                "Failed to create Certificate %s/%s: %s %s",
+                namespace,
+                secretname,
+                e.status,
+                e.reason,
+            )
+            return
         logging.info("Requested Certificate %s for hosts %s", secretname, desired_hosts)
+        return
+
+    existing = cert.get("spec", {})
+    existing_ref = existing.get("issuerRef", {})
+    existing_hosts = existing.get("dnsNames", [])
+    # Compare
+    if (
+        existing_ref.get("kind") != desired_kind
+        or existing_ref.get("name") != desired_name
+        or set(existing_hosts) != set(desired_hosts)
+    ):
+        # Patch
+        patch_body = {"spec": desired_spec}
+        try:
+            crds.patch_namespaced_custom_object(
+                CERT_GROUP, CERT_VERSION, namespace, CERT_PLURAL, secretname, patch_body
+            )
+        except ApiException as e:
+            logging.error(
+                "Failed to patch Certificate %s/%s: %s %s",
+                namespace,
+                secretname,
+                e.status,
+                e.reason,
+            )
+            return
+        logging.info(
+            "Patched Certificate %s (issuerRef %s→%s/%s hosts %s→%s)",
+            secretname,
+            existing_ref,
+            desired_kind,
+            desired_name,
+            existing_hosts,
+            desired_hosts,
+        )
+    else:
+        logging.info("No update required for Certificate %s", secretname)
 
 
 def delete_certificate(crds, namespace, secretname, event):
