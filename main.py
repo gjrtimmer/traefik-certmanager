@@ -141,6 +141,9 @@ def reconcile_certificate(
         if route.get("kind") == "Rule" and "Host" in route.get("match", ""):
             hostmatch = re.findall(r"Host\(([^)]+)\)", route["match"])
             desired_hosts.extend(re.findall(r"`([^`]+)`", ",".join(hostmatch)))
+    # Deduplicate, preserving order. Several routes commonly share one Host (a /api rule plus a
+    # catch-all, for example), which otherwise yields a SAN list with the same name repeated.
+    desired_hosts = list(dict.fromkeys(desired_hosts))
     if not desired_hosts:
         logging.info("%s/%s: no hosts, skipping", namespace, secretname)
         return
