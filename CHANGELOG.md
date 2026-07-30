@@ -1,3 +1,13 @@
+## **2.3.1**&emsp;<sub><sup>2026-07-30 ([fcc6a28...3ff6019](https://github.com/gjrtimmer/traefik-certmanager/compare/fcc6a28be95a79763bbe3b5a6283eff06ae2b2a5...3ff6019b84ee90de5af0bf0f2309e9fe022ad391?diff=split))</sup></sub>
+
+### Operations
+
+##### &ensp;`ci`
+
+- drop linux/arm/v7 from multi\-arch build ([3ff6019](https://github.com/gjrtimmer/traefik-certmanager/commit/3ff6019b84ee90de5af0bf0f2309e9fe022ad391))
+
+<br>
+
 ## **2.3.0**&emsp;<sub><sup>2026-07-30 ([57f9b1a...3cd83aa](https://github.com/gjrtimmer/traefik-certmanager/compare/57f9b1ace2895433d64a35654e5a605ca6531c01...3cd83aaa954255e45402fb6309d54447d0ab4bf9?diff=split))</sup></sub>
 
 ### Features
