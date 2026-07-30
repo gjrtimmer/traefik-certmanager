@@ -1,3 +1,23 @@
+## **2.3.0**&emsp;<sub><sup>2026-07-30 ([57f9b1a...3cd83aa](https://github.com/gjrtimmer/traefik-certmanager/compare/57f9b1ace2895433d64a35654e5a605ca6531c01...3cd83aaa954255e45402fb6309d54447d0ab4bf9?diff=split))</sup></sub>
+
+### Features
+
+##### &ensp;`filter`
+
+- fall back to spec\.ingressClassName for ingress class filter ([37b87eb](https://github.com/gjrtimmer/traefik-certmanager/commit/37b87eb965b60aa0e7c7b0a7ca5dcaa0ca205de0))
+
+### Bug Fixes
+
+##### &ensp;`hosts`
+
+- deduplicate desired hosts before building Certificate spec ([e0920f6](https://github.com/gjrtimmer/traefik-certmanager/commit/e0920f66379c20b4c2a55200d791a0886bac4d16))
+
+##### &ensp;`reconcile`
+
+- only guard the lookup, not the patch, against ApiException ([3cd83aa](https://github.com/gjrtimmer/traefik-certmanager/commit/3cd83aaa954255e45402fb6309d54447d0ab4bf9))
+
+<br>
+
 ## **2.2.2**&emsp;<sub><sup>2025-05-01 ([9aafbda...9a64488](https://github.com/gjrtimmer/traefik-certmanager/compare/9aafbdabbc3def401568854e592e0799bc01b10f...9a64488768c71390961f960bf329ee5646a8f75b?diff=split))</sup></sub>
 
 ### Maintenance
