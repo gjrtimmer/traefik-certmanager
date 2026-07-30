@@ -16,8 +16,11 @@ rules:
   resources: ["ingressroutes"]
   verbs: ["watch", "patch"]
 - apiGroups: ["cert-manager.io"]
+  # patch is required for drift correction: when an IngressRoute's hosts or issuerRef change, the
+  # controller patches the existing Certificate rather than recreating it. Without patch every
+  # such attempt fails 403 and the certificate silently stays stale on the old hosts.
   resources: ["certificates"]
-  verbs: ["get", "create", "delete"]
+  verbs: ["get", "create", "patch", "delete"]
 - apiGroups: [""]
   resources: ["configmaps", "leases"]
   verbs: ["get", "list", "watch", "create", "update", "patch"]
