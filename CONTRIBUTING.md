@@ -171,7 +171,7 @@ To build & push a latest image from main branch:
 ```shell
 # in CI via .github/workflows/docker-latest.yml:
 docker buildx build \
-  --platform linux/amd64,linux/arm64,linux/arm/v7 \
+  --platform linux/amd64,linux/arm64 \
   --tag <dockerhub_user>/traefik-certmanager:latest \
   --push .
 ```
@@ -180,7 +180,7 @@ Or locally:
 
 ```shell
 docker buildx build \
-  --platform linux/amd64,linux/arm64,linux/arm/v7 \
+  --platform linux/amd64,linux/arm64 \
   -t <dockerhub_user>/traefik-certmanager:latest .
 ```
 
