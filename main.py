@@ -246,7 +246,12 @@ def watch_crd(group, version, plural):
                 ns = safe_get(obj, "metadata.namespace")
                 name = safe_get(obj, "metadata.name")
                 annotations = obj.get("metadata", {}).get("annotations", {})
-                cls = annotations.get("kubernetes.io/ingress.class", "")
+                # spec.ingressClassName is the modern field; the annotation is the legacy one.
+                # Reading only the annotation meant any IngressRoute written the current way was
+                # silently skipped as not-in-filter and never got a certificate.
+                cls = annotations.get("kubernetes.io/ingress.class") or safe_get(
+                    obj, "spec.ingressClassName", ""
+                )
                 tls = safe_get(obj, "spec.tls")
                 secretname = safe_get(obj, "spec.tls.secretName")
                 routes = safe_get(obj, "spec.routes")
